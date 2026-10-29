@@ -10,8 +10,23 @@ public class DriverList implements IDriverList{
 	@Override
 	public boolean add(IDriver driver) {
 		boolean exist = false;
+		drivers.findFirst();
 		
-		while(drivers.last)
+		while(drivers.last){
+			IDriver tmp = drivers.retrieve();
+
+		if(tmp.getID() == driver.getID(){
+				exist = true;
+				break}
+
+			else if(tmp.getID() < driver.getID())
+				drivers.findNext();
+
+			else{
+				IDriver e = drivers.retrieve();
+				drivers.update(tmp);
+				drivers.insert(e);
+			}
 	}
 
 }
