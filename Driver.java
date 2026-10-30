@@ -3,8 +3,8 @@ public class Driver extends Person implements IDriver {
 	private String vehiclePlate;
 	private VehicleType vehicleType;
 	
-	public Driver(String name , int id, String PhoneNumber, String vehiclePlate, VehicleType vehicleType) {
-		super(name , id, PhoneNumber);
+	public Driver(int id , String name, String PhoneNumber, String vehiclePlate, VehicleType vehicleType) {
+		super(id, name , PhoneNumber);
 		this.setVehiclePlate(vehiclePlate);
 		this.vehicleType = vehicleType;
 	}
