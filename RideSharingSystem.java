@@ -40,7 +40,7 @@ public boolean addDriver(IDriver driver) {
     if (driver == null)
         return false;
 
-    if (drivers.findById(driver.getDriverId()) != null)
+    if (drivers.findById(driver.getId()) != null)
         return false;
 
     if (drivers.findByVehiclePlate(driver.getVehiclePlate()) != null)
