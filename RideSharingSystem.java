@@ -15,46 +15,24 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
 	
-@Override
 public boolean loadDriversFromCSV(String driversFilePath) {
-    try (Scanner file = new Scanner(new File(driversFilePath))) {
-
-        while (file.hasNextLine()) {
-            String line = file.nextLine();
-
-            if (line.trim().isEmpty())
-                continue;
-
-            String[] f = line.split(",", -1);
-
-            if (f.length != 5)
-                return false;
-
-            try {
-                VehicleType type = VehicleType.valueOf(f[4].trim());
-
-                IDriver driver = new Driver(
-                    Integer.parseInt(f[0].trim()),
-                    f[1].trim(),
-                    f[2].trim(),
-                    f[3].trim(),
-                    type
-                );
-
-                if (!addDriver(driver))
-                    return false;
-
-            } catch (IllegalArgumentException e) {
-                return false;
+        try {
+            Scanner file = new Scanner(new File(driversFilePath));
+            while (file.hasNextLine()) {
+                String[] f = file.nextLine().split(",");
+                try {
+                    VehicleType type = VehicleType.valueOf(f[4]);  // "SUV" -> VehicleType.SUV
+                    addDriver(new Driver(Integer.parseInt(f[0]), f[1], f[2], f[3], type));
+                } catch (Exception e) {
+                    // a wrong line (bad plate, unknown type, ...) is skipped
+                }
             }
+            file.close();
+            return true;
+        } catch (FileNotFoundException e) {
+            return false;
         }
-
-        return true;
-
-    } catch (FileNotFoundException e) {
-        return false;
     }
-}
 
   
  @Override
