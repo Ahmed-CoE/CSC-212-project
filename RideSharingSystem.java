@@ -45,13 +45,19 @@ public class RideSharingSystem implements IRideSharingSystem {
 }
 
   
-  public boolean addDriver(IDriver driver) {
-        if (driver == null)
-            return false;
-        if (drivers.findByVehiclePlate(driver.getVehiclePlate()) != null)
-            return false;
-        return drivers.add(driver);         
-    }
+ @Override
+public boolean addDriver(IDriver driver) {
+    if (driver == null)
+        return false;
+
+    if (drivers.findById(driver.getDriverId()) != null)
+        return false;
+
+    if (drivers.findByVehiclePlate(driver.getVehiclePlate()) != null)
+        return false;
+
+    return drivers.add(driver);
+}
 
 
 
