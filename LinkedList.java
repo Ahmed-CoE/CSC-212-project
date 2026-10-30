@@ -42,7 +42,7 @@ public class LinkedList <T> implements List <T>{
 			head = current = new Node(val);
 		
 		else {
-			Node tmp = new Node();
+			Node<T> tmp = new Node();
 			tmp = current.next;
 			current.next = new Node(val);
 			current = current.next;
@@ -55,7 +55,7 @@ public class LinkedList <T> implements List <T>{
 			head = head.next;
 			current = head;}
 		else {
-			Node tmp = head;
+			Node<T> tmp = head;
 			while(!(tmp.next==current)) {
 				tmp = tmp.next;
 			}
