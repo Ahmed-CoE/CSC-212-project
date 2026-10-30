@@ -8,7 +8,7 @@ public abstract class Person implements IPerson {
 	private String PhoneNumber;
 	private LinkedList<IRide> rideHistory;
 
-	public Person(String name, int id, String PhoneNumber) {
+	public Person(int id, String name, String PhoneNumber) {
 		setName(name);
 		setPhoneNumber(PhoneNumber);
 		this.id = id;
