@@ -97,9 +97,10 @@ public class DriverList implements IDriverList{
 
         return null;
     }
+    
 
     @Override
-    public LinkedList <IDriver> findByVehicleType(String vehicleType){
+    public LinkedList <IDriver> findByVehicleType(VehicleType vehicleType){
         LinkedList <IDriver> list = new LinkedList<IDriver> ();
         
         if(drivers.empty())
@@ -119,6 +120,131 @@ public class DriverList implements IDriverList{
 
         return list;
     }
+
+
+    @Override
+    public LinkedList <IDriver> getAll(){
+       return drivers;
+    }
+
+
+    @Override 
+    public boolean removeById(int id){
+        if(drivers.empty())
+            return false;
+
+        drivers.findFirst();
+        while(!drivers.last()){
+            IDriver tmp = drivers.retrieve();
+            if(tmp.getId() == id){
+                drivers.remove();
+                return true;
+            }
+            drivers.findNext();
+        }
+        IDriver tmp2 = drivers.retrieve();
+        if(tmp2.getId() == id){
+            drivers.remove();
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
+    public boolean removeByVehiclePlate (String vehiclePlate){
+          if(drivers.empty())
+            return false;
+
+        drivers.findFirst();
+        while(!drivers.last()){
+            IDriver tmp = drivers.retrieve();
+            if(tmp.getVehiclePlate().equals(vehiclePlate)){
+                drivers.remove();
+                return true;
+            }
+            drivers.findNext();
+        }
+       IDriver tmp2 = drivers.retrieve();
+         if(tmp2.getVehiclePlate().equals(vehiclePlate)){
+            drivers.remove();
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
+    public int removeByName(String name){
+        int count = 0;
+        if(drivers.empty())
+            return count;
+        
+        drivers.findFirst();
+        while(!drivers.last()){
+            IDriver tmp = drivers.retrieve();
+            if(tmp.getName().equals(name)){
+                count++;
+                drivers.remove();
+            }
+            else{
+                drivers.findNext();
+            }
+        }
+        IDriver tmp2 = drivers.retrieve();
+            if(tmp2.getName().equals(name)){
+                count++;
+                drivers.remove();
+            }
+        return count;
+    }
+
+
+    @Override
+    public int removeByVehicleType(VehicleType vehicleType){
+        int count = 0;
+
+        if(drivers.empty())
+            return count;
+
+        drivers.findFirst();
+        while(!drivers.last()){
+            IDriver tmp = drivers.retrieve();
+            if(tmp.getVehicleType() == vehicleType){
+                count++;
+                drivers.remove();
+            }
+            else{
+                drivers.findNext();
+            }
+        }
+
+            IDriver tmp2 = drivers.retrieve();
+            if(tmp2.getVehicleType() == vehicleType){
+                count++;
+                drivers.remove();
+            }
+         return count;
+    }
+
+
+    @Override
+    public int size(){
+        int count = 0;
+        if(drivers.empty())
+            return count;
+
+        drivers.findFirst();
+        while(!drivers.last()){
+            count++;
+            drivers.findNext();
+        }
+        count++;
+        return count;}
+
+
+
+}
 
 
     
