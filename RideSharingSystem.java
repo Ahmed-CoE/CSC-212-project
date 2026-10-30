@@ -71,7 +71,54 @@ public class RideSharingSystem implements IRideSharingSystem {
         return drivers.getAll();
     }
 
-  
+  public boolean removeDriver(int driverId) {
+        IDriver driver = drivers.findById(driverId);
+        if (driver == null)
+            return false;
+        LinkedList<IRide> h = driver.getRideHistory();
+        while (!h.empty()) {                    
+            h.findFirst();
+            deleteRide(h.retrieve());
+        }
+        return drivers.removeById(driverId);
+    }
+
+    private void deleteRide(IRide ride) {
+        rides.removeRideById(ride.getRideId());
+        removeFromHistory(ride.getDriver(), ride);
+        if (ride instanceof IPrivateRide) {
+            IPrivateRide privateRide = (IPrivateRide) ride;
+            removeFromHistory(privateRide.getRider(), ride);
+        } else {
+            ISharedRide sharedRide = (ISharedRide) ride;
+            LinkedList<IRider> list = sharedRide.getParticipants();
+            if (!list.empty()) {
+                list.findFirst();
+                while (!list.last()) {
+                    removeFromHistory(list.retrieve(), ride);
+                    list.findNext();
+                }
+                removeFromHistory(list.retrieve(), ride);    
+            }
+        }
+    }
+
+    
+    private void removeFromHistory(IPerson person, IRide ride) {
+        LinkedList<IRide> h = person.getRideHistory();
+        if (h.empty())
+            return;
+        h.findFirst();
+        while (!h.last()) {
+            if (h.retrieve().getRideId() == ride.getRideId()) {
+                h.remove();
+                return;
+            }
+            h.findNext();
+        }
+        if (h.retrieve().getRideId() == ride.getRideId())    
+            h.remove();
+    }
 
 	
 
