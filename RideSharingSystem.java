@@ -72,64 +72,8 @@ public class RideSharingSystem implements IRideSharingSystem {
     }
 
   
-public LinkedList<IRider> getSharedRideParticipants(String pickupLocation) {
-    LinkedList<IRider> result = new LinkedList<IRider>();
-    LinkedList<IRide> found = rides.findByPickupLocation(pickupLocation);
 
-    if (found.empty())
-        return result;
-
-    found.findFirst();
-
-    while (!found.last()) {
-        copyRiders(found.retrieve(), result);
-        found.findNext();
-    }
-
-    copyRiders(found.retrieve(), result); 
-
-    return result;
-}
-
-
-private void copyRiders(IRide ride, LinkedList<IRider> result) {
-    if (!(ride instanceof ISharedRide))
-        return; 
-
-    ISharedRide sharedRide = (ISharedRide) ride;
-    LinkedList<IRider> list = sharedRide.getParticipants();
-
-    if (list.empty())
-        return;
-
-    list.findFirst();
-
-    while (!list.last()) {
-        addIfNew(result, list.retrieve());
-        list.findNext();
-    }
-
-    addIfNew(result, list.retrieve()); 
-}
-
-private void addIfNew(LinkedList<IRider> list, IRider rider) {
-    if (!list.empty()) {
-        list.findFirst();
-
-        while (!list.last()) {
-            if (list.retrieve().getId() == rider.getId())
-                return;
-
-            list.findNext();
-        }
-
-        if (list.retrieve().getId() == rider.getId()) 
-            return;
-    }
-
-    list.insert(rider); 
-}
-
+	
 
   
   
