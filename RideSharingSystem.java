@@ -238,13 +238,7 @@ public boolean addDriver(IDriver driver) {
 	            String phoneNumber = data[3].trim();
 	            String homeCity = data[4].trim();
 
-	            IRider rider = new Rider(
-	                    name,
-	                    id,
-	                    phoneNumber,
-	                    email,
-	                    homeCity
-	            );
+	            IRider rider = new Rider(id,name,phoneNumber,email, homeCity);
 
 	            if (!addRider(rider))
 	                return false;
