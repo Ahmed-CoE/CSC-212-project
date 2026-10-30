@@ -1,6 +1,5 @@
-package phase1;
+public class RiderList implements IRiderList {  
 
-public class RiderList implements IRiderList {
 
 	    private LinkedList<IRider> riders;
 
