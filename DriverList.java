@@ -79,17 +79,53 @@ public class DriverList implements IDriverList{
     }
 
     @Override
-    public IDriver findByVehiclePlate(Stirng vehiclePlate){
-        if(drivers.empty)
+    public IDriver findByVehiclePlate(String vehiclePlate){
+        if(drivers.empty())
             return null;
 
         drivers.findFirst();
         while(!drivers.last()){
             IDriver tmp = drivers.retrieve();
-            if(tmp.gset
+            if(tmp.getVehiclePlate().equals(vehiclePlate)){
+                return tmp;
+            }
+            drivers.findNext();
         }
-        
+         IDriver tmp2 = drivers.retrieve();
+            if(tmp2.getVehiclePlate().equals(vehiclePlate)){
+                return tmp2;}
+
+        return null;
     }
+
+    @Override
+    public LinkedList <IDriver> findByVehicleType(String vehicleType){
+        LinkedList <IDriver> list = new LinkedList<IDriver> ();
+        
+        if(drivers.empty())
+           return list;
+
+        drivers.findFirst();
+        while(!drivers.last()){
+            IDriver tmp = drivers.retrieve();
+            if(tmp.getVehicleType() == vehicleType){
+                list.insert(tmp);
+            }
+            drivers.findNext();
+        }
+        IDriver tmp2 = drivers.retrieve();
+        if(tmp2.getVehicleType() == vehicleType)
+            list.insert(tmp2);
+
+        return list;
+    }
+
+
+    
+
+    
+
+    
 
 
 
