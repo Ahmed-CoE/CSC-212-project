@@ -250,5 +250,357 @@ public boolean addDriver(IDriver driver) {
 	        return false;
 	    }
 	}
+private int nextRideId = 1;
 
+private boolean hasConflict(IDateTime newPickup,
+                            IDateTime newDropoff,
+                            IRide oldRide) {
+
+    return newPickup.compareTo(oldRide.getDropoffTime()) < 0
+            && oldRide.getPickupTime().compareTo(newDropoff) < 0;
+}
+
+private boolean personHasConflict(IPerson person,
+                                  IDateTime pickupTime,
+                                  IDateTime dropoffTime) {
+
+    LinkedList<IRide> history = person.getRideHistory();
+
+    if (history.empty())
+        return false;
+
+    history.findFirst();
+
+    while (true) {
+
+        IRide ride = history.retrieve();
+
+        if (hasConflict(pickupTime, dropoffTime, ride))
+            return true;
+
+        if (history.last())
+            break;
+
+        history.findNext();
+    }
+
+    return false;
+}
+
+private void addToHistory(IPerson person, IRide ride) {
+
+    LinkedList<IRide> history = person.getRideHistory();
+
+    if (history.empty()) {
+        history.insert(ride);
+        return;
+    }
+
+    history.findFirst();
+
+    while (!history.last()) {
+        history.findNext();
+    }
+
+    history.insert(ride);
+}
+
+@Override
+public boolean schedulePrivateRide(String pickupLocation,
+                                   IDateTime pickupTime,
+                                   IDateTime dropoffTime,
+                                   String dropoffLocation,
+                                   int riderId,
+                                   int driverId) {
+
+    IRider rider = riderList.findById(riderId);
+
+    if (rider == null)
+        return false;
+
+    IDriver driver = driverList.findById(driverId);
+
+    if (driver == null)
+        return false;
+
+    if (pickupTime.compareTo(dropoffTime) >= 0)
+        return false;
+
+    if (personHasConflict(rider, pickupTime, dropoffTime))
+        return false;
+
+    if (personHasConflict(driver, pickupTime, dropoffTime))
+        return false;
+
+    PrivateRide ride = new PrivateRide(
+            nextRideId,
+            pickupLocation,
+            pickupTime,
+            dropoffTime,
+            dropoffLocation,
+            driver,
+            rider
+    );
+
+    if (!rideList.addRide(ride))
+        return false;
+
+    addToHistory(rider, ride);
+    addToHistory(driver, ride);
+
+    nextRideId++;
+
+    return true;
+}
+
+@Override
+public boolean scheduleSharedRide(String pickupLocation,
+                                  IDateTime pickupTime,
+                                  IDateTime dropoffTime,
+                                  String dropoffLocation,
+                                  int[] riderIds,
+                                  int driverId) {
+
+    if (riderIds == null || riderIds.length == 0)
+        return false;
+
+    IDriver driver = driverList.findById(driverId);
+
+    if (driver == null)
+        return false;
+
+    if (pickupTime.compareTo(dropoffTime) >= 0)
+        return false;
+
+    if (personHasConflict(driver, pickupTime, dropoffTime))
+        return false;
+
+    for (int i = 0; i < riderIds.length; i++) {
+
+        IRider rider = riderList.findById(riderIds[i]);
+
+        if (rider == null)
+            return false;
+
+        if (personHasConflict(rider, pickupTime, dropoffTime))
+            return false;
+    }
+
+    SharedRide ride = new SharedRide(
+            nextRideId,
+            pickupLocation,
+            pickupTime,
+            dropoffTime,
+            dropoffLocation,
+            driver
+    );
+
+    for (int i = 0; i < riderIds.length; i++) {
+
+        IRider rider = riderList.findById(riderIds[i]);
+
+        if (!ride.addParticipant(rider))
+            return false;
+    }
+
+    if (!rideList.addRide(ride))
+        return false;
+
+    for (int i = 0; i < riderIds.length; i++) {
+
+        IRider rider = riderList.findById(riderIds[i]);
+
+        addToHistory(rider, ride);
+    }
+
+    addToHistory(driver, ride);
+
+    nextRideId++;
+
+    return true;
+}
+
+@Override
+public LinkedList<IRide> searchRidesByPickupLocation(String pickupLocation) {
+
+    return rideList.findByPickupLocation(pickupLocation);
+}
+
+@Override
+public LinkedList<IRide> searchRidesByRiderName(String riderName) {
+
+    return rideList.findByRiderName(riderName);
+}
+
+@Override
+public LinkedList<IRider> getSharedRideParticipants(String pickupLocation) {
+
+    LinkedList<IRider> result = new LinkedList<IRider>();
+
+    LinkedList<IRide> matches =
+            rideList.findByPickupLocation(pickupLocation);
+
+    if (matches.empty())
+        return result;
+
+    matches.findFirst();
+
+    while (true) {
+
+        IRide ride = matches.retrieve();
+
+        if (ride instanceof ISharedRide) {
+
+            ISharedRide sharedRide = (ISharedRide) ride;
+            LinkedList<IRider> participants =
+                    sharedRide.getParticipants();
+
+            if (!participants.empty()) {
+
+                participants.findFirst();
+
+                while (true) {
+
+                    result.insert(participants.retrieve());
+
+                    if (participants.last())
+                        break;
+
+                    participants.findNext();
+                }
+            }
+
+            return result;
+        }
+
+        if (matches.last())
+            break;
+
+        matches.findNext();
+    }
+
+    return result;
+}
+
+@Override
+public LinkedList<IRide> getAllRidesAlphabetically() {
+
+    return rideList.getAllAlphabetically();
+}
+
+private IDateTime parseDateTime(String value) {
+
+    String[] parts = value.trim().split(" ");
+
+    String[] date = parts[0].split("/");
+    String[] time = parts[1].split(":");
+
+    int month = Integer.parseInt(date[0]);
+    int day = Integer.parseInt(date[1]);
+    int year = Integer.parseInt(date[2]);
+
+    int hour = Integer.parseInt(time[0]);
+    int minute = Integer.parseInt(time[1]);
+
+    return new DateTime(year, month, day, hour, minute);
+}
+
+@Override
+public boolean loadRidesFromCSV(String ridesFilePath) {
+
+    try {
+
+        java.io.BufferedReader reader =
+                new java.io.BufferedReader(
+                        new java.io.FileReader(ridesFilePath)
+                );
+
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+
+            line = line.trim();
+
+            if (line.isEmpty())
+                continue;
+
+            String[] data = line.split(",");
+
+            if (data.length != 7) {
+                reader.close();
+                return false;
+            }
+
+            String rideType = data[0].trim();
+            String pickupLocation = data[1].trim();
+
+            IDateTime pickupTime =
+                    parseDateTime(data[2].trim());
+
+            IDateTime dropoffTime =
+                    parseDateTime(data[3].trim());
+
+            String dropoffLocation = data[4].trim();
+
+            int driverId =
+                    Integer.parseInt(data[5].trim());
+
+            String riderData = data[6].trim();
+
+            if (rideType.equals("PRIVATE")) {
+
+                int riderId =
+                        Integer.parseInt(riderData);
+
+                if (!schedulePrivateRide(
+                        pickupLocation,
+                        pickupTime,
+                        dropoffTime,
+                        dropoffLocation,
+                        riderId,
+                        driverId)) {
+
+                    reader.close();
+                    return false;
+                }
+
+            } else if (rideType.equals("SHARED")) {
+
+                String[] ids = riderData.split(";");
+
+                int[] riderIds = new int[ids.length];
+
+                for (int i = 0; i < ids.length; i++) {
+                    riderIds[i] =
+                            Integer.parseInt(ids[i].trim());
+                }
+
+                if (!scheduleSharedRide(
+                        pickupLocation,
+                        pickupTime,
+                        dropoffTime,
+                        dropoffLocation,
+                        riderIds,
+                        driverId)) {
+
+                    reader.close();
+                    return false;
+                }
+
+            } else {
+
+                reader.close();
+                return false;
+            }
+        }
+
+        reader.close();
+
+        return true;
+
+    } catch (Exception e) {
+
+        return false;
+    }
+}
 }
