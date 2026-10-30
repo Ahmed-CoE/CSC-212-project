@@ -38,110 +38,72 @@ public interface IDriver extends IPerson, Comparable<IDriver> {
 
 
 
-// The rides, kept in alphabetical order of pickup location.
-// We are the IMPLEMENTER here: we work directly on the nodes (head, p, p.next).
-public class RideList implements IRideList {
-    private Node<IRide> head;
-    private int size;
+public abstract class Ride implements IRide {
+    private static int counter = 0;          // static: ONE counter shared by all rides
+    private final int rideId;
+    private String pickupLocation;
+    private final IDateTime pickupTime;      // final + no setter: never changes
+    private final IDateTime dropoffTime;     // final + no setter: never changes
+    private String dropoffLocation;
+    private IDriver driver;
 
-    public RideList() {
-        head = null;
-        size = 0;
+    public Ride(String pickupLocation, IDateTime pickupTime, IDateTime dropoffTime,
+                String dropoffLocation, IDriver driver) {
+        counter++;                           // 1 for the first ride, 2 for the second, ...
+        rideId = counter;
+        this.pickupLocation = pickupLocation;
+        this.pickupTime = pickupTime;
+        this.dropoffTime = dropoffTime;
+        this.dropoffLocation = dropoffLocation;
+        this.driver = driver;
     }
 
-    // Same idea as RiderList.add, but the key is the pickup location (compareTo of Ride).
-    public boolean addRide(IRide ride) {
-        Node<IRide> tmp = new Node<IRide>(ride);
-        // rule: empty list, or the new location comes first -> new head
-        if (head == null || ride.compareTo(head.data) < 0) {
-            tmp.next = head;
-            head = tmp;
-        } else {
-            Node<IRide> p = head;
-            // <= : a new ride goes AFTER the rides that have the same location
-            while (p.next != null && p.next.data.compareTo(ride) <= 0)
-                p = p.next;
-            tmp.next = p.next;
-            p.next = tmp;
-        }
-        size++;
-        return true;
+    public int getRideId() {
+        return rideId;
     }
 
-    // The ride ID is unique: remove at most one ride.
-    public boolean removeRideById(int rideId) {
-        if (head == null)
-            return false;
-        if (head.data.getRideId() == rideId) {
-            head = head.next;
-            size--;
-            return true;
-        }
-        Node<IRide> p = head;
-        while (p.next != null) {
-            if (p.next.data.getRideId() == rideId) {
-                p.next = p.next.next;
-                size--;
-                return true;
-            }
-            p = p.next;
-        }
-        return false;
+    public String getPickupLocation() {
+        return pickupLocation;
     }
 
-    // The list is already in alphabetical order, so one walk is enough: O(n).
-    public LinkedList<IRide> getAllAlphabetically() {
-        LinkedList<IRide> result = new LinkedList<IRide>();
-        Node<IRide> p = head;
-        while (p != null) {
-            result.insert(p.data);
-            p = p.next;
-        }
-        return result;
+    public void setPickupLocation(String pickupLocation) {
+        this.pickupLocation = pickupLocation;
     }
 
-    public LinkedList<IRide> findByPickupLocation(String pickupLocation) {
-        LinkedList<IRide> result = new LinkedList<IRide>();
-        Node<IRide> p = head;
-        while (p != null) {
-            if (p.data.getPickupLocation().equalsIgnoreCase(pickupLocation))
-                result.insert(p.data);
-            p = p.next;
-        }
-        return result;
+    public IDateTime getPickupTime() {
+        return pickupTime;
     }
 
-    public LinkedList<IRide> findByRiderName(String riderFullName) {
-        LinkedList<IRide> result = new LinkedList<IRide>();
-        Node<IRide> p = head;
-        while (p != null) {
-            if (hasRiderNamed(p.data, riderFullName))
-                result.insert(p.data);
-            p = p.next;
-        }
-        return result;
+    public IDateTime getDropoffTime() {
+        return dropoffTime;
     }
 
-    // Is a rider with this full name on the ride?
-    private boolean hasRiderNamed(IRide ride, String name) {
-        if (ride instanceof IPrivateRide) {                       // a private ride: one rider
-            IPrivateRide privateRide = (IPrivateRide) ride;
-            return privateRide.getRider().getName().equals(name);
-        }
-        ISharedRide sharedRide = (ISharedRide) ride;     // a shared ride: walk its riders
-        LinkedList<IRider> riders = sharedRide.getParticipants();
-        if (riders.empty())
-            return false;
-        riders.findFirst();
-        while (!riders.last()) {
-            if (riders.retrieve().getName().equals(name))
-                return true;
-            riders.findNext();
-        }
-        return riders.retrieve().getName().equals(name);         // the last rider
+    public String getDropoffLocation() {
+        return dropoffLocation;
     }
 
-    public int size() {
-        return size;
+    public void setDropoffLocation(String dropoffLocation) {
+        this.dropoffLocation = dropoffLocation;
+    }
+
+    public IDriver getDriver() {
+        return driver;
+    }
+
+    public void setDriver(IDriver driver) {
+        this.driver = driver;
+    }
+
+    // hasRider(riderId) is not written here: PrivateRide and SharedRide each write their own.
+
+    // Rides are compared alphabetically by pickup location.
+    public int compareTo(IRide other) {
+        return pickupLocation.compareTo(other.getPickupLocation());
+    }
+
+    public String toString() {
+        return "Ride " + rideId + " | " + pickupLocation + " " + pickupTime.format()
+                + " -> " + dropoffLocation + " " + dropoffTime.format()
+                + " | Driver " + driver.getId() + " " + driver.getName();
     }
 }
