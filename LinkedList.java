@@ -44,7 +44,7 @@ public class LinkedList <T> implements List <T>{
 		else {
 			Node<T> tmp = new Node();
 			tmp = current.next;
-			current.next = new Node(val);
+			current.next = new Node<T>(val);
 			current = current.next;
 			current.next = tmp;
 		}
