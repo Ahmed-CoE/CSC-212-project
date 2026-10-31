@@ -67,39 +67,7 @@ public class LinkedList <T> implements List <T>{
 			current = head;
 	}
 	
-	public void display() {
-		if(empty())
-			return;
-		current = head;
-		while(!last()) {
-			System.out.println(retrieve());
-			current = current.next;
-		}
-		System.out.println(retrieve());
-		
-	}
-	
-	public void reverse() {
-		if(empty())
-			return;
-		
-		Node <T> prev = null;
-		current = head;
-		Node <T> after = head.next;
-		
-		while(current != null) {
-			current.next = prev;
-			prev = current;
-			current = after;
-			if(current != null)
-			after = current.next;
-		}
-		
-		head = prev;
-		current = head;
-	}
-	}
-		
+}
 	
 
 
