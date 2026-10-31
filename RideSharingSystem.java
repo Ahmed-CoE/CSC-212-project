@@ -144,41 +144,28 @@ public class RideSharingSystem implements IRideSharingSystem {
 
 	@Override
 	public boolean removeRider(int riderId) {
-
-		if (riders.findById(riderId) == null)
+		IRider rider = riders.findById(riderId);
+		if (rider == null)
 			return false;
-
 		LinkedList<IRide> allRides = rides.getAllAlphabetically();
-
 		if (!allRides.empty()) {
-
 			allRides.findFirst();
-
 			while (true) {
-
 				IRide ride = allRides.retrieve();
-
 				if (ride.hasRider(riderId)) {
-
 					if (ride instanceof IPrivateRide) {
-
-						rides.removeRideById(ride.getRideId());
-
+						deleteRide(ride);
 					} else if (ride instanceof ISharedRide) {
-
 						ISharedRide sharedRide = (ISharedRide) ride;
-
 						sharedRide.removeParticipantById(riderId);
-
+						removeFromHistory(rider, ride);
 						if (sharedRide.isEmpty()) {
-							rides.removeRideById(ride.getRideId());
+							deleteRide(ride);
 						}
 					}
 				}
-
 				if (allRides.last())
 					break;
-
 				allRides.findNext();
 			}
 		}
@@ -383,7 +370,7 @@ public class RideSharingSystem implements IRideSharingSystem {
 
 		LinkedList<IRider> result = new LinkedList<IRider>();
 
-		LinkedList<IRide> matches = rides.findByPickupLocation(pickupLocation); 
+		LinkedList<IRide> matches = rides.findByPickupLocation(pickupLocation);
 
 		if (matches.empty())
 			return result;
