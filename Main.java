@@ -1,5 +1,3 @@
-package phase1;
-
 import java.util.Scanner;
 
 public class Main {
@@ -9,10 +7,10 @@ public class Main {
 		Scanner input = new Scanner(System.in);
 		RideSharingSystem system = new RideSharingSystem();
 
-		system.loadRidersFromCSV("riders 100.csv");
-		system.loadDriversFromCSV("drivers 30.csv");
-		system.loadRidesFromCSV("rides 40.csv");
-
+		system.loadRidersFromCSV("riders_100.csv");
+		system.loadDriversFromCSV("drivers_30.csv");
+		system.loadRidesFromCSV("rides_40.csv");
+		
 		int choice;
 
 		do {
